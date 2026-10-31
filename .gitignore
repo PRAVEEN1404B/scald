@@ -42,3 +42,6 @@ handoff.md
 
 # Architecture diagrams are kept local-only
 *.drawio
+
+# Local diagram exports (kept off GitHub)
+*.drawio*.png
