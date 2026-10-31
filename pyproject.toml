@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scald"
+name = "scald-defense"
 version = "0.1.0"
 description = "SCALD — Split-Context Attack Layered Defense: multi-layer defense-in-depth against split-context prompt injection in tool-using AI agents"
 readme = "README.md"

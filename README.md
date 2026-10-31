@@ -214,6 +214,33 @@ backend resolution, and the defense registry.
 
 ---
 
+## Releases and continuous delivery
+
+The PyPI distribution name is **`scald-defense`** (`scald` is already registered by an
+unrelated project). Publishing uses **PyPI trusted publishing (OIDC)** — no API tokens
+are stored in the repository.
+
+```bash
+# Stable release → PyPI
+#   bump "version" in pyproject.toml, then:
+git tag v0.1.0
+git push origin v0.1.0
+
+# Pre-release → TestPyPI (tag contains a hyphen)
+git tag v0.2.0rc1 && git push origin v0.2.0rc1
+```
+
+The workflow (`.github/workflows/workflow.yml`) lints, tests on Python 3.10–3.12, builds
+sdist + wheel, validates them with `twine check`, smoke-tests the wheel in a clean venv,
+and only then publishes. Tags must match the package version exactly.
+
+One-time setup on PyPI: add a **pending trusted publisher** for project
+`scald-defense` with owner `PRAVEEN1404B`, repository `scald`, workflow
+`workflow.yml`, environment `pypi` (and the same on TestPyPI with environment
+`testpypi`).
+
+---
+
 ## Repository layout
 
 ```
