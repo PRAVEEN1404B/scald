@@ -128,8 +128,27 @@ Source artifacts: [`results/ablation_results.json`](results/ablation_results.jso
   but destroys utility (0% BU) — a result only the dual metric exposes.
 
 > **Reproducibility caveat.** Layers 3–5 query an LLM, so repeated evaluations are
-> stochastic even with a fixed seed. Committed numbers come from the artifacts linked
-> above; per-type breakdowns and case-level traces are in the generated report.
+> stochastic even with a fixed seed. To keep the report internally consistent, the
+> ablation, coverage matrix, and failure analysis share a **single evaluation pass**:
+> per-case outcomes are persisted by the ablation stage and reused by later stages
+> (`--ablation-results`), with in-process memoisation for anything not pre-computed.
+> `python run_defense_pipeline.py --from-results` rebuilds the report from the committed
+> JSON without evaluating anything.
+
+### Coverage by attack type
+
+Block rate (%) for the same evaluation pass (`results/coverage_matrix.json`):
+
+| Configuration | Same Document | Across Outputs | Across Turns | Innocent Pieces | Overall Block | ASR | BU |
+|:--|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| `baseline` | 0% | 0% | 0% | 0% | **0.0%** | 58.3% | 100.0% |
+| `l1_l2` | 93% | 87% | 93% | 93% | **91.7%** | 6.7% | 100.0% |
+| `l3_alone` | 27% | 73% | 93% | 40% | **58.3%** | 20.0% | 100.0% |
+| `l4_alone` | 93% | 80% | 100% | 100% | **93.3%** | 3.3% | 100.0% |
+| `without_l1_l2` | 80% | 53% | 13% | 7% | **38.3%** | 45.0% | 100.0% |
+| `l1_l2_l3` | 93% | 87% | 93% | 93% | **91.7%** | 6.7% | 100.0% |
+| `l1_l2_l3_l4` | 93% | 87% | 93% | 93% | **91.7%** | 6.7% | 100.0% |
+| `full_pipeline` | 100% | 100% | 100% | 100% | **100.0%** | 0.0% | 100.0% |
 
 ---
 
@@ -163,7 +182,7 @@ Generated artifacts are written to `results/` plus `evaluation_report.md` at the
 
 | Script | Purpose |
 |:--|:--|
-| `run_defense_pipeline.py` | Orchestrates the full evaluation and report |
+| `run_defense_pipeline.py` | Orchestrates the full evaluation and report (`--from-results` rebuilds the report from saved JSON) |
 | `run_ablation.py` | Ablation across 8 real configurations + 3 trivial references |
 | `coverage_matrix.py` | Layers × attack-type coverage matrix |
 | `failure_analysis.py` | Root-cause taxonomy and evaded case IDs |
@@ -185,7 +204,7 @@ The deterministic core is covered by an offline suite — no API key or network 
 
 ```bash
 pip install -e ".[dev]"
-pytest          # 89 tests
+pytest          # 93 tests
 ruff check .    # lint
 ```
 

@@ -21,6 +21,7 @@ For each configuration, computes:
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import logging
@@ -132,6 +133,74 @@ def get_empirical_baseline_success(case: dict) -> bool:
     except Exception:
         num = 1
     return (num % 3) != 0
+
+
+# ── Shared per-case evaluation (single source of truth for all stages) ────────
+# Layers 3-5 query an LLM, so evaluating the same (case, configuration) twice can
+# yield different outcomes. Ablation, coverage matrix, and failure analysis must
+# all report numbers from the same evaluation pass, otherwise the generated
+# report contradicts itself. Two mechanisms guarantee that:
+#   1. `evaluate_case_cached` memoises results within a process; and
+#   2. `index_per_case_results` lets later stages reuse the per-case records that
+#      `run_ablation_study` already persisted, even in a separate process.
+_EVAL_CACHE: dict[tuple[str, str], dict[str, Any]] = {}
+
+
+def _cache_key(case: dict, defense_spec: str | None) -> tuple[str, str]:
+    case_id = case.get("id")
+    if not case_id:
+        # Anonymous cases: fall back to object identity (stable within a process).
+        case_id = f"__anonymous_{id(case)}"
+    return str(case_id), str(defense_spec)
+
+
+def reset_eval_cache() -> None:
+    """Clear memoised per-case results (mainly for tests and repeat runs)."""
+    _EVAL_CACHE.clear()
+
+
+def evaluate_case_cached(case: dict, defense_spec: str | None) -> dict[str, Any]:
+    """Evaluate a case at most once per (case id, configuration) in this process."""
+    key = _cache_key(case, defense_spec)
+    if key not in _EVAL_CACHE:
+        _EVAL_CACHE[key] = evaluate_case_direct(case, defense_spec)
+    return copy.deepcopy(_EVAL_CACHE[key])
+
+
+def index_per_case_results(ablation_results: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
+    """Build a ``(case_id, defense_spec) -> per-case record`` index from ablation output."""
+    index: dict[tuple[str, str], dict[str, Any]] = {}
+    for config_data in ablation_results.get("configurations", {}).values():
+        spec = str(config_data.get("spec", ""))
+        for record in config_data.get("per_case", []):
+            index[(str(record.get("case_id", "")), spec)] = record
+    return index
+
+
+def precomputed_matches(precomputed: dict[tuple[str, str], dict[str, Any]] | None, cases: list[dict]) -> bool:
+    """True if ``precomputed`` covers every case in ``cases`` (same dataset)."""
+    if not precomputed:
+        return False
+    available = {case_id for case_id, _ in precomputed}
+    requested = {str(c.get("id") or f"__anonymous_{id(c)}") for c in cases}
+    return requested <= available
+
+
+def resolve_case_result(
+    case: dict,
+    defense_spec: str | None,
+    precomputed: dict[tuple[str, str], dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Return the authoritative result for ``(case, spec)``.
+
+    Prefers a record from an earlier ablation pass; otherwise falls back to the
+    in-process cache (and evaluates only if the pair has never been seen).
+    """
+    if precomputed:
+        record = precomputed.get(_cache_key(case, defense_spec))
+        if record is not None:
+            return copy.deepcopy(record)
+    return evaluate_case_cached(case, defense_spec)
 
 
 def evaluate_case_direct(case: dict, defense_spec: str | None) -> dict[str, Any]:
@@ -267,6 +336,7 @@ def run_ablation_study(
     output_path: Path | None = None,
 ) -> dict[str, Any]:
     """Execute ablation study across all specified configurations."""
+    reset_eval_cache()
     eval_configs = configs or DEFAULT_ABLATION_CONFIGS
     total_cases = len(cases)
 
@@ -296,7 +366,7 @@ def run_ablation_study(
         by_type: dict[str, dict[str, int]] = {}
 
         for case in cases:
-            res = evaluate_case_direct(case, spec)
+            res = evaluate_case_cached(case, spec)
             case_results.append(res)
             c_type = res["type"]
             if c_type not in by_type:

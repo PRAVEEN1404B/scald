@@ -12,6 +12,7 @@ Orchestrates all required project evaluation stages in a single pipeline:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -50,7 +51,7 @@ def generate_full_evaluation_report(
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     md_sections = [
-        "# Prompt Injection Defense (PID) — Comprehensive Evaluation Report",
+        "# SCALD — Comprehensive Evaluation Report",
         f"**Generated:** {ts} | **Dataset:** {total_cases} Split-Context Cases (12 empirically verified) | **Evaluation Platform:** InjecAgent + Split-Context Benchmark Suite",
         "",
         "---",
@@ -199,6 +200,40 @@ def generate_full_evaluation_report(
     return report_content
 
 
+def rebuild_report_from_results(report_path: Path) -> Path:
+    """Regenerate ``evaluation_report.md`` from the committed JSON artifacts.
+
+    Useful after fixing report formatting: it performs no evaluation and makes no
+    LLM calls, but guarantees the report is derived from the same per-case data
+    stored in ``results/ablation_results.json``.
+    """
+    artifacts = {
+        "ablation": RESULTS_DIR / "ablation_results.json",
+        "coverage": RESULTS_DIR / "coverage_matrix.json",
+        "failure": RESULTS_DIR / "failure_analysis.json",
+    }
+    missing = [name for name, path in artifacts.items() if not path.exists()]
+    if missing:
+        raise SystemExit(
+            "Cannot rebuild the report; missing artifacts: "
+            + ", ".join(str(artifacts[name]) for name in missing)
+        )
+
+    loaded = {}
+    for name, path in artifacts.items():
+        with open(path, encoding="utf-8") as f:
+            loaded[name] = json.load(f)
+
+    print(f"\n📄 Rebuilding {report_path} from existing results (no evaluation)...")
+    generate_full_evaluation_report(
+        ablation_results=loaded["ablation"],
+        coverage_results=loaded["coverage"],
+        failure_results=loaded["failure"],
+        output_path=report_path,
+    )
+    return report_path
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run Master PID Defense Evaluation Pipeline")
     parser.add_argument(
@@ -224,9 +259,18 @@ def main():
         default=str(RESULTS_DIR / "evaluation_report.md"),
         help="Output path for the generated Markdown evaluation report",
     )
+    parser.add_argument(
+        "--from-results",
+        action="store_true",
+        help="Rebuild evaluation_report.md from existing results/*.json without re-evaluating anything",
+    )
     add_reproducibility_args(parser)
     args = parser.parse_args()
     apply_reproducibility_args(args)
+
+    if args.from_results:
+        rebuild_report_from_results(Path(args.report_file))
+        return
 
     cases = load_dataset(args.dataset)
     if args.limit:
@@ -245,12 +289,20 @@ def main():
     # Stage 2: Coverage Matrix
     print("\n[Stage 2/4] Generating Coverage Matrix (Layers × Attack Types)...")
     coverage_out = RESULTS_DIR / "coverage_matrix.json"
-    coverage_results = generate_coverage_matrix(cases, output_path=coverage_out)
+    coverage_results = generate_coverage_matrix(
+        cases,
+        output_path=coverage_out,
+        ablation_results=ablation_results,
+    )
 
     # Stage 3: Failure Analysis
     print("\n[Stage 3/4] Conducting Root-Cause Failure Analysis...")
     failure_out = RESULTS_DIR / "failure_analysis.json"
-    failure_results = analyze_failures(cases, output_path=failure_out)
+    failure_results = analyze_failures(
+        cases,
+        output_path=failure_out,
+        ablation_results=ablation_results,
+    )
 
     # Stage 4: Comprehensive Evaluation Report
     print("\n[Stage 4/4] Compiling Comprehensive Evaluation Report with Wilson CIs...")

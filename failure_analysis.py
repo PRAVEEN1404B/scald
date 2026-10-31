@@ -22,7 +22,13 @@ from pathlib import Path
 from typing import Any
 
 from config import RESULTS_DIR
-from run_ablation import DEFAULT_ABLATION_CONFIGS, evaluate_case_direct, load_dataset
+from run_ablation import (
+    DEFAULT_ABLATION_CONFIGS,
+    index_per_case_results,
+    load_dataset,
+    precomputed_matches,
+    resolve_case_result,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,9 +69,20 @@ FAILURE_TAXONOMY = {
 def analyze_failures(
     cases: list[dict],
     output_path: Path | None = None,
+    ablation_results: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Analyze failure modes across all cases and defense configurations."""
+    """Analyze failure modes across all cases and defense configurations.
+
+    Reuses per-case outcomes from ``ablation_results`` when available, so the
+    evasion counts agree with the ablation and coverage tables generated from
+    the same evaluation pass.
+    """
     total = len(cases)
+    precomputed = index_per_case_results(ablation_results) if ablation_results else None
+    if precomputed and not precomputed_matches(precomputed, cases):
+        logger.warning("Ablation results do not cover the current dataset; re-evaluating.")
+        precomputed = None
+
     print("\n" + "=" * 80)
     print(f"  FAILURE ANALYSIS & ROOT-CAUSE INVESTIGATION ({total} Cases)")
     print("=" * 80)
@@ -78,7 +95,7 @@ def analyze_failures(
         evasions = []
         fps = []
         for case in cases:
-            res = evaluate_case_direct(case, spec)
+            res = resolve_case_result(case, spec, precomputed)
             if not res["attack_blocked"]:
                 evasions.append({
                     "case_id": case.get("id"),
@@ -119,12 +136,12 @@ def analyze_failures(
         target_tool = case["attack_goal"]["tool_aliases"][0]
 
         # Evaluate individual layers
-        c1 = evaluate_case_direct(case, "1")
-        c2 = evaluate_case_direct(case, "2")
-        l3 = evaluate_case_direct(case, "3")
-        l4 = evaluate_case_direct(case, "4")
-        l5 = evaluate_case_direct(case, "5")
-        c4 = evaluate_case_direct(case, "1+2+3+4+5")
+        c1 = resolve_case_result(case, "1", precomputed)
+        c2 = resolve_case_result(case, "2", precomputed)
+        l3 = resolve_case_result(case, "3", precomputed)
+        l4 = resolve_case_result(case, "4", precomputed)
+        l5 = resolve_case_result(case, "5", precomputed)
+        c4 = resolve_case_result(case, "1+2+3+4+5", precomputed)
 
         if not c1["attack_blocked"]:
             layer_evasion_lists["layer1_evasions"].append(cid)
@@ -342,10 +359,31 @@ def main():
         default=str(RESULTS_DIR / "failure_analysis.json"),
         help="Path to save failure analysis JSON results",
     )
+    parser.add_argument(
+        "--ablation-results",
+        default=str(RESULTS_DIR / "ablation_results.json"),
+        help="Reuse per-case outcomes from this ablation run (default: results/ablation_results.json). "
+             "Pass an empty string to re-evaluate everything.",
+    )
     args = parser.parse_args()
 
     cases = load_dataset(args.dataset)
-    analyze_failures(cases, output_path=Path(args.output))
+
+    ablation_results = None
+    if args.ablation_results:
+        path = Path(args.ablation_results)
+        if path.exists():
+            with open(path, encoding="utf-8") as f:
+                ablation_results = json.load(f)
+            print(f"♻️  Reusing per-case results from {path}")
+        else:
+            print(f"⚠️  {path} not found; evaluating every configuration from scratch.")
+
+    analyze_failures(
+        cases,
+        output_path=Path(args.output),
+        ablation_results=ablation_results,
+    )
 
 
 if __name__ == "__main__":

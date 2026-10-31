@@ -24,7 +24,13 @@ from typing import Any
 
 from config import RESULTS_DIR
 from metrics.wilson import wilson_interval
-from run_ablation import DEFAULT_ABLATION_CONFIGS, evaluate_case_direct, load_dataset
+from run_ablation import (
+    DEFAULT_ABLATION_CONFIGS,
+    index_per_case_results,
+    load_dataset,
+    precomputed_matches,
+    resolve_case_result,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +46,19 @@ def generate_coverage_matrix(
     cases: list[dict],
     configs: list[tuple[str, str, str]] | None = None,
     output_path: Path | None = None,
+    ablation_results: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Generate the full layers × attack types coverage matrix."""
+    """Generate the full layers × attack types coverage matrix.
+
+    When ``ablation_results`` is supplied, per-case outcomes are reused from that
+    single evaluation pass so the coverage table can never contradict the
+    ablation table. Missing configurations are evaluated once and cached.
+    """
     eval_configs = configs or DEFAULT_ABLATION_CONFIGS
+    precomputed = index_per_case_results(ablation_results) if ablation_results else None
+    if precomputed and not precomputed_matches(precomputed, cases):
+        logger.warning("Ablation results do not cover the current dataset; re-evaluating.")
+        precomputed = None
 
     matrix_data: dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -85,7 +101,7 @@ def generate_coverage_matrix(
             fp_count = 0
 
             for c in type_cases:
-                res = evaluate_case_direct(c, spec)
+                res = resolve_case_result(c, spec, precomputed)
                 if res["attack_blocked"]:
                     blocked += 1
                 if res["attack_succeeded"]:
@@ -262,10 +278,31 @@ def main():
         default=str(RESULTS_DIR / "coverage_matrix.json"),
         help="Path to save coverage matrix JSON results",
     )
+    parser.add_argument(
+        "--ablation-results",
+        default=str(RESULTS_DIR / "ablation_results.json"),
+        help="Reuse per-case outcomes from this ablation run (default: results/ablation_results.json). "
+             "Pass an empty string to re-evaluate everything.",
+    )
     args = parser.parse_args()
 
     cases = load_dataset(args.dataset)
-    generate_coverage_matrix(cases, output_path=Path(args.output))
+
+    ablation_results = None
+    if args.ablation_results:
+        path = Path(args.ablation_results)
+        if path.exists():
+            with open(path, encoding="utf-8") as f:
+                ablation_results = json.load(f)
+            print(f"♻️  Reusing per-case results from {path}")
+        else:
+            print(f"⚠️  {path} not found; evaluating every configuration from scratch.")
+
+    generate_coverage_matrix(
+        cases,
+        output_path=Path(args.output),
+        ablation_results=ablation_results,
+    )
 
 
 if __name__ == "__main__":
