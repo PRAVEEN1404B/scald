@@ -63,8 +63,6 @@ graph TD
 The pipeline is assembled by `defence.get_defense(spec)`, e.g. `"1+2"`, `"1+2+3+4"`,
 `"without_l1_l2"`, or `"full"`.
 
-> 📐 **Editable architecture diagram:** [`docs/scald_architecture.drawio`](docs/scald_architecture.drawio)
-> — open with [diagrams.net](https://app.diagrams.net) or the VS Code *Draw.io Integration* extension.
 
 ---
 

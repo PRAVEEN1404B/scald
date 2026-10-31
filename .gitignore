@@ -39,3 +39,6 @@ handoff.md
 # GitHub Actions workflows are kept local until the credential has the 'workflow' scope.
 # To publish them: git add -f .github/workflows/workflow.yml
 .github/workflows/
+
+# Architecture diagrams are kept local-only
+*.drawio
