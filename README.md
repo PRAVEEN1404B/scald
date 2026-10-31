@@ -269,12 +269,6 @@ scald/
 }
 ```
 
-## Acknowledgements
-
-The InjecAgent benchmark is included as a git submodule from
-[uiuc-kang-lab/InjecAgent](https://github.com/uiuc-kang-lab/InjecAgent). SCALD's own
-benchmark, defense layers, and evaluation tooling are original work.
-
 ## License
 
 [MIT](LICENSE) © 2026 Praveen Biram
