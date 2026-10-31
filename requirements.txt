@@ -1,0 +1,9 @@
+# Runtime dependencies for the PID defense pipeline.
+# Pinned to tested major versions; install with:
+#   ./venv/bin/pip install -r requirements.txt
+
+openai>=1.30,<4
+anthropic>=0.25,<2
+datasets>=2.19,<6
+rich>=13.7,<16
+python-dotenv>=1.0,<2

@@ -1,0 +1,38 @@
+# ── Secrets ──
+.env
+.env.*
+!.env.example
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ── Virtual environments ──
+venv/
+.venv/
+
+# ── Runtime output ──
+logs/
+__pycache__/
+
+# ── OS / editor noise ──
+.DS_Store
+Thumbs.db
+*.swp
+
+# ── Large local-only artifacts (not needed to reproduce) ──
+*.pdf
+result_screenshort_60cases/
+
+# ── Local run snapshots / scratch notes ──
+results_before_rerun/
+*_before_rerun.md
+results/evaluation_report.md
+handoff.md
+
+# CI workflow is kept locally until the credential has the GitHub 'workflow' scope
+.github/workflows/ci.yml
