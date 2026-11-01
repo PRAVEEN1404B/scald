@@ -210,7 +210,7 @@ def analyze_failures(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(analysis_results, f, indent=2)
-        print(f"\n💾 Failure analysis saved to: {output_path}")
+        print(f"\nFailure analysis saved to: {output_path}")
 
     print_failure_summary(analysis_results)
     return analysis_results
@@ -375,9 +375,9 @@ def main():
         if path.exists():
             with open(path, encoding="utf-8") as f:
                 ablation_results = json.load(f)
-            print(f"♻️  Reusing per-case results from {path}")
+            print(f"Reusing per-case results from {path}")
         else:
-            print(f"⚠️  {path} not found; evaluating every configuration from scratch.")
+            print(f"Warning: {path} not found; evaluating every configuration from scratch.")
 
     analyze_failures(
         cases,

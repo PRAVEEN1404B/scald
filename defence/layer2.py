@@ -459,7 +459,7 @@ class Layer2Defense(BaseDefense):
                 self.last_provenance_records.append(record)
                 self.provenance_history.append(record)
 
-                logger.warning("🚨 [Layer 2 Block] %s", block_reason)
+                logger.warning("[Layer 2 Block] %s", block_reason)
                 return False, block_reason
 
             # Grounded in user request or untracked

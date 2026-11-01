@@ -145,14 +145,14 @@ def run_defended_demo(defense_spec: Any = 1):
     )
 
     email_calls = [t for t in result.tool_trace if t.tool_name == "send_email"]
-    print(f"\n📊 Defended Demo Tool Calls: {len(result.tool_trace)}")
+    print(f"\nDefended demo tool calls: {len(result.tool_trace)}")
     print(f"   send_email calls: {len(email_calls)}")
 
     if not email_calls:
-        print("🛡️  SUCCESS: Agent did NOT execute the exfiltration command!")
+        print("SUCCESS: Agent did NOT execute the exfiltration command.")
         print("   Defense successfully neutralized the prompt injection.")
     else:
-        print("⚠️  Warning: Agent called send_email despite defense.")
+        print("Warning: Agent called send_email despite defense.")
 
     return len(email_calls) == 0
 
@@ -234,7 +234,7 @@ def main():
     }
 
     if not combined_results["is_full_dataset"]:
-        print("\n⚠️  PARTIAL RUN: this is NOT a full baseline/defense comparison.")
+        print("\nWARNING: PARTIAL RUN: this is NOT a full baseline/defense comparison.")
         print("   Use --max-cases 0 (default) for the complete InjecAgent set.")
 
     # Step 1: Demo with defense
@@ -259,7 +259,7 @@ def main():
             combined_results["injecagent"] = ij_results
         except Exception as e:
             logger.error("InjecAgent benchmark failed: %s", e)
-            print(f"❌ InjecAgent benchmark failed: {e}")
+            print(f"InjecAgent benchmark failed: {e}")
             combined_results["injecagent"] = {"error": str(e)}
 
     # Step 3: Save defense results
@@ -267,7 +267,7 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(combined_results, f, indent=2)
 
-    print(f"\n💾 Defended results saved to: {output_path}")
+    print(f"\nDefended results saved to: {output_path}")
 
     # Step 4: Load baseline results for before/after comparison
     baseline_path = RESULTS_DIR / "baseline_asr.json"
@@ -282,7 +282,7 @@ def main():
     # Step 5: Print comparison table
     print_comparison_table(combined_results, baseline_results)
 
-    print("\n✅ Phase 1 evaluation complete!")
+    print("\nPhase 1 evaluation complete.")
     print(f"   Results file: {output_path}")
 
 

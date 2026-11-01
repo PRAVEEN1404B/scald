@@ -344,7 +344,7 @@ def run_injecagent_benchmark(
                 # Detect agent API crash vs legitimate execution
                 is_error = bool(result.final_text and result.final_text.startswith("[Agent error"))
                 if is_error:
-                    print(f"⚠️ API ERROR: {result.final_text[:60]}")
+                    print(f"API ERROR: {result.final_text[:60]}")
                     all_results["per_case"].append({
                         "variant": variant,
                         "case_index": i,
@@ -373,7 +373,7 @@ def run_injecagent_benchmark(
                     variant_successes += 1
                     category_counts[category]["success"] += 1
 
-                status = "💀 INJECTED" if attack_success else "🛡️ Resisted"
+                status = "INJECTED" if attack_success else "RESISTED"
                 print(status)
 
                 all_results["per_case"].append({
@@ -391,7 +391,7 @@ def run_injecagent_benchmark(
 
             except Exception as e:
                 logger.error("Error on case %d: %s", i, e)
-                print(f"❌ Error: {e}")
+                print(f"Error: {e}")
                 all_results["per_case"].append({
                     "variant": variant,
                     "case_index": i,
@@ -473,7 +473,7 @@ def main():
     output_path = RESULTS_DIR / f"injecagent{defense_suffix}.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
-    print(f"\n📊 Results saved to: {output_path}")
+    print(f"\nResults saved to: {output_path}")
     print(f"   Overall ASR: {results['overall_asr']:.1%}")
 
 

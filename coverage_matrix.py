@@ -162,7 +162,7 @@ def generate_coverage_matrix(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(matrix_data, f, indent=2)
-        print(f"\n💾 Coverage matrix saved to: {output_path}")
+        print(f"\nCoverage matrix saved to: {output_path}")
 
     print_matrix_tables(matrix_data)
     return matrix_data
@@ -294,9 +294,9 @@ def main():
         if path.exists():
             with open(path, encoding="utf-8") as f:
                 ablation_results = json.load(f)
-            print(f"♻️  Reusing per-case results from {path}")
+            print(f"Reusing per-case results from {path}")
         else:
-            print(f"⚠️  {path} not found; evaluating every configuration from scratch.")
+            print(f"Warning: {path} not found; evaluating every configuration from scratch.")
 
     generate_coverage_matrix(
         cases,

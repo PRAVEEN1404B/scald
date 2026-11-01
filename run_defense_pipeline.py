@@ -144,14 +144,14 @@ def generate_full_evaluation_report(
         "    AgentPlanner --> ToolProposed{\"Risky Tool Proposed?<br>(send, share, delete)\"}",
         "    ToolProposed -- No --> ExecuteDirect[\"Execute Tool Directly\"]",
         "    ToolProposed -- Yes --> L2Provenance[\"Layer 2: Provenance & Grounding\"]",
-        "    L2Provenance -- Tainted & Ungrounded --> BlockAction[\"🚨 BLOCK ACTION\"]",
+        "    L2Provenance -- Tainted & Ungrounded --> BlockAction[\"BLOCK ACTION\"]",
         "    L2Provenance -- Grounded or Ambiguous --> L3Probing[\"Layer 3: Single-Span Probing\"]",
         "    L3Probing -- Decisive Single Span --> BlockAction",
         "    L3Probing -- Invariant --> L4Window[\"Layer 4: Paired/Windowed Removal & Pruning\"]",
         "    L4Window -- Causal Multi-Span Group --> BlockAction",
         "    L4Window -- Invariant --> L5CrossSource[\"Layer 5: Cross-Source & Turn Removal\"]",
         "    L5CrossSource -- Causal Source Unit --> BlockAction",
-        "    L5CrossSource -- Authorized / Benign --> AllowAction[\"✅ ALLOW & EXECUTE\"]",
+        "    L5CrossSource -- Authorized / Benign --> AllowAction[\"ALLOW & EXECUTE\"]",
         "```",
         "",
         "---",
@@ -194,7 +194,7 @@ def generate_full_evaluation_report(
     with open(root_report, "w", encoding="utf-8") as f:
         f.write(report_content)
 
-    print("\n📄 Full evaluation report generated at:")
+    print("\nFull evaluation report generated at:")
     print(f"   - {output_path}")
     print(f"   - {root_report}")
     return report_content
@@ -224,7 +224,7 @@ def rebuild_report_from_results(report_path: Path) -> Path:
         with open(path, encoding="utf-8") as f:
             loaded[name] = json.load(f)
 
-    print(f"\n📄 Rebuilding {report_path} from existing results (no evaluation)...")
+    print(f"\nRebuilding {report_path} from existing results (no evaluation)...")
     generate_full_evaluation_report(
         ablation_results=loaded["ablation"],
         coverage_results=loaded["coverage"],
@@ -277,7 +277,7 @@ def main():
         cases = cases[:args.limit]
 
     print("\n" + "=" * 80)
-    print("  🚀 PROMPT INJECTION DEFENSE (PID) — MASTER PIPELINE EXECUTION")
+    print("  PROMPT INJECTION DEFENSE (PID) - MASTER PIPELINE EXECUTION")
     print(f"  Loaded cases: {len(cases)} from {args.dataset}")
     print("=" * 80)
 
@@ -315,7 +315,7 @@ def main():
     )
 
     print("\n" + "=" * 80)
-    print("  ✅ DEFENSE EVALUATION PIPELINE COMPLETE!")
+    print("  DEFENSE EVALUATION PIPELINE COMPLETE")
     print(f"  Report: {report_path}")
     print("=" * 80 + "\n")
 

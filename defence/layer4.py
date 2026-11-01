@@ -236,7 +236,7 @@ class Layer4Defense(BaseDefense):
 
         if pruned_count > 0:
             logger.info(
-                "🔪 [Layer 4 Prune] Removed %d/%d suspicious span(s) "
+                "[Layer 4 Prune] Removed %d/%d suspicious span(s) "
                 "from '%s' output.",
                 pruned_count,
                 len(spans),
@@ -468,7 +468,7 @@ class Layer4Defense(BaseDefense):
                             f"form a fragmented injection."
                         )
                         logger.warning(
-                            "🚨 [Layer 4 Block — pair] %s", block_reason
+                            "[Layer 4 Block - pair] %s", block_reason
                         )
                         return False, block_reason
 
@@ -544,7 +544,7 @@ class Layer4Defense(BaseDefense):
                                 f"split-context injection attack."
                             )
                             logger.warning(
-                                "🚨 [Layer 4 Block — window-%d] %s",
+                                "[Layer 4 Block - window-%d] %s",
                                 win_size,
                                 block_reason,
                             )

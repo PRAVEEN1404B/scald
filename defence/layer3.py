@@ -725,7 +725,7 @@ class Layer3Defense(BaseDefense):
                         f"eliminate the action.  "
                         f"Matched patterns: {matched}."
                     )
-                    logger.warning("🚨 [Layer 3 Block] %s", block_reason)
+                    logger.warning("[Layer 3 Block] %s", block_reason)
                     return False, block_reason
 
             if not found_causal:

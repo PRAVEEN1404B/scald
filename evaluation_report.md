@@ -1,5 +1,5 @@
 # SCALD — Comprehensive Evaluation Report
-**Generated:** 2026-10-31 14:23:27 UTC | **Dataset:** 60 Split-Context Cases (12 empirically verified) | **Evaluation Platform:** InjecAgent + Split-Context Benchmark Suite
+**Generated:** 2026-11-01 13:19:56 UTC | **Dataset:** 60 Split-Context Cases (12 empirically verified) | **Evaluation Platform:** InjecAgent + Split-Context Benchmark Suite
 
 ---
 
@@ -136,14 +136,14 @@ graph TD
     AgentPlanner --> ToolProposed{"Risky Tool Proposed?<br>(send, share, delete)"}
     ToolProposed -- No --> ExecuteDirect["Execute Tool Directly"]
     ToolProposed -- Yes --> L2Provenance["Layer 2: Provenance & Grounding"]
-    L2Provenance -- Tainted & Ungrounded --> BlockAction["🚨 BLOCK ACTION"]
+    L2Provenance -- Tainted & Ungrounded --> BlockAction["BLOCK ACTION"]
     L2Provenance -- Grounded or Ambiguous --> L3Probing["Layer 3: Single-Span Probing"]
     L3Probing -- Decisive Single Span --> BlockAction
     L3Probing -- Invariant --> L4Window["Layer 4: Paired/Windowed Removal & Pruning"]
     L4Window -- Causal Multi-Span Group --> BlockAction
     L4Window -- Invariant --> L5CrossSource["Layer 5: Cross-Source & Turn Removal"]
     L5CrossSource -- Causal Source Unit --> BlockAction
-    L5CrossSource -- Authorized / Benign --> AllowAction["✅ ALLOW & EXECUTE"]
+    L5CrossSource -- Authorized / Benign --> AllowAction["ALLOW & EXECUTE"]
 ```
 
 ---

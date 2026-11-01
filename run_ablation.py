@@ -352,7 +352,7 @@ def run_ablation_study(
     }
 
     for config_key, spec, description in eval_configs:
-        print(f"\n🔍 Evaluating {config_key.upper()} ({spec}) — {description}...")
+        print(f"\nEvaluating {config_key.upper()} ({spec}) — {description}...")
         case_results = []
         attack_successes = 0
         attacks_blocked = 0
@@ -449,7 +449,7 @@ def run_ablation_study(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2)
-        print(f"\n💾 Ablation study saved to: {output_path}")
+        print(f"\nAblation study saved to: {output_path}")
 
     print_ablation_summary_table(results)
     return results

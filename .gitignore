@@ -45,3 +45,9 @@ handoff.md
 
 # Local diagram exports (kept off GitHub)
 *.drawio*.png
+
+# Local diagram exports and report-format sources
+use_case_diagram.png
+*.drawio.png
+Screenshot*.png
+Report_Format*.zip

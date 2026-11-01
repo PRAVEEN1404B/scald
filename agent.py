@@ -157,7 +157,7 @@ def run_agent(
                     from config import GROQ_API_KEYS, rotate_groq_key
                     if len(GROQ_API_KEYS) > 1:
                         new_key = rotate_groq_key()
-                        print(f"   🔄 Groq key rate limited. Rotating to key ...{new_key[-8:]}")
+                        print(f"   Groq key rate limited. Rotating to key ...{new_key[-8:]}")
                         client = OpenAI(base_url=base_url, api_key=new_key)
                         time.sleep(1.0)
                         continue

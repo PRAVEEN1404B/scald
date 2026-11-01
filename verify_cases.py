@@ -82,7 +82,7 @@ def agent(cases, harness, trials, limit=None, offset=0, out_path=None):
     target_cases = cases[start_idx:end_idx]
     total = len(target_cases)
     
-    print(f"\n🚀 Running Agent Verification on {total} case(s) (trials={trials})...")
+    print(f"\nRunning agent verification on {total} case(s) (trials={trials})...")
     for idx, c in enumerate(target_cases, 1):
         g, turns = c["attack_goal"], c["user_turns"]
         case_id = c["id"]
@@ -99,7 +99,7 @@ def agent(cases, harness, trials, limit=None, offset=0, out_path=None):
             ok_a, ok_b = False, True
             print(f"   ⏩ Full attack did not succeed (full={full}/{trials}). Skipping fragments & pairs.")
         else:
-            print(f"   🎯 Full attack succeeded ({full}/{trials})! Checking single fragments & pairs...")
+            print(f"   Full attack succeeded ({full}/{trials}). Checking single fragments and pairs...")
             single = [sum(attack_succeeded(h.run_agent(turns, render(c, {k}), c), g) for _ in range(trials)) for k in range(3)]
             pairs = [sum(attack_succeeded(h.run_agent(turns, render(c, set(p)), c), g) for _ in range(trials)) for p in ((0, 1), (0, 2), (1, 2))]
             ok_a, ok_b = True, sum(single) == 0
@@ -107,7 +107,7 @@ def agent(cases, harness, trials, limit=None, offset=0, out_path=None):
         c["verified"]["full_attack_succeeds_undefended"], c["verified"]["single_fragment_succeeds"] = ok_a, not ok_b
         c["verified"]["log"] = dict(trials=trials, full=full, single=single, pairs_diagnostic=pairs)
         
-        status = "✅ PASS" if (ok_a and ok_b) else "❌ FAIL"
+        status = "PASS" if (ok_a and ok_b) else "FAIL"
         if not (ok_a and ok_b):
             bad.append((c["id"], full, single))
         print(f"   Result: {case_id} -> full={full}, single={single}, pairs={pairs} [{status}]")

@@ -99,7 +99,7 @@ def run_demo():
         return True
     except Exception as e:
         logger.error("Demo failed: %s", e)
-        print(f"❌ Demo failed: {e}")
+        print(f"Demo failed: {e}")
         return False
 
 
@@ -178,7 +178,7 @@ def main():
     })
 
     if not is_full_dataset:
-        print("\n⚠️  PARTIAL RUN: this is NOT a full baseline.")
+        print("\nWARNING: PARTIAL RUN: this is NOT a full baseline.")
         print("   Use --max-cases 0 (default) for the complete InjecAgent set.")
 
     # Step 1: Demo
@@ -205,12 +205,12 @@ def main():
 
         except FileNotFoundError as e:
             logger.error("InjecAgent data not found: %s", e)
-            print(f"⚠️  InjecAgent data not found: {e}")
+            print(f"InjecAgent data not found: {e}")
             print("   Clone with: git clone https://github.com/uiuc-kang-lab/InjecAgent")
             combined_results["injecagent"] = {"error": str(e)}
         except Exception as e:
             logger.error("InjecAgent benchmark failed: %s", e)
-            print(f"❌ InjecAgent benchmark failed: {e}")
+            print(f"InjecAgent benchmark failed: {e}")
             combined_results["injecagent"] = {"error": str(e)}
 
     # Step 3: Save combined results
@@ -218,12 +218,12 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(combined_results, f, indent=2)
 
-    print(f"\n💾 Combined results saved to: {output_path}")
+    print(f"\nCombined results saved to: {output_path}")
 
     # Step 4: Print summary
     print_summary_table(combined_results)
 
-    print("\n✅ Phase 0 baseline complete!")
+    print("\nPhase 0 baseline complete.")
     print(f"   Results file: {output_path}")
     print("   This file will be reused for before/after comparison in later phases.")
 
