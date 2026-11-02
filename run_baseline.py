@@ -36,7 +36,7 @@ def print_summary_table(results: dict):
         from rich.console import Console
         from rich.table import Table
 
-        console = Console()
+        console = Console(color_system=None)
         table = Table(title="Phase 0 — Undefended Baseline ASR", show_lines=True)
         table.add_column("Benchmark", style="bold cyan")
         table.add_column("Category", style="white")

@@ -36,7 +36,7 @@ def print_comparison_table(defense_results: dict, baseline_results: dict | None 
         from rich.console import Console
         from rich.table import Table
 
-        console = Console()
+        console = Console(color_system=None)
         defense_name = defense_results.get("defense", "Layer 1")
         title = f"Phase 1 — Defense Evaluation ({defense_name})"
         if baseline_results:

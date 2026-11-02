@@ -222,7 +222,7 @@ def print_failure_summary(results: dict[str, Any]):
         from rich.console import Console
         from rich.table import Table
 
-        console = Console()
+        console = Console(color_system=None)
 
         # ── 1. Root Cause Distribution ──
         table = Table(title="Failure Analysis — Root Cause Distribution Across Dataset", show_lines=True)

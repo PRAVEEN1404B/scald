@@ -1,5 +1,8 @@
 """Centralised configuration for the PID project."""
 import os
+
+# Keep terminal output free of ANSI colour codes (Rich also honours NO_COLOR).
+os.environ.setdefault("NO_COLOR", "1")
 import platform
 import random
 import subprocess

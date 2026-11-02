@@ -461,7 +461,7 @@ def print_ablation_summary_table(results: dict[str, Any]):
         from rich.console import Console
         from rich.table import Table
 
-        console = Console()
+        console = Console(color_system=None)
         table = Table(
             title="Prompt Injection Defense — Ablation Study Results",
             show_lines=True,

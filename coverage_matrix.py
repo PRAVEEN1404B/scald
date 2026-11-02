@@ -174,7 +174,7 @@ def print_matrix_tables(data: dict[str, Any]):
         from rich.console import Console
         from rich.table import Table
 
-        console = Console()
+        console = Console(color_system=None)
 
         # ── 1. Block / Detection Rate Matrix ──
         table_block = Table(
